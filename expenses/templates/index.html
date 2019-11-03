@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+    <div>
+        <form method="post" action="{% url 'expenses:submit' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="date">Дата</label>
+                <input
+                        id="date"
+                        name="date"
+                        type="date"
+                        class="form-control"
+                        required
+                />
+            </div>
+            <div class="form-group">
+                <label for="category">Описание</label>
+                <select
+                        id="category"
+                        name="category"
+                        class="custom-select"
+                        required
+                >
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                    <option value="">Другое</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input
+                        id="otherCategory"
+                        type="text"
+                        class="form-control"
+                        autocomplete="off"
+                        maxlength="30"
+                        hidden
+                />
+            </div>
+            <div class="form-group">
+                <label for="sum">Сумма</label>
+                <input
+                        id="sum"
+                        name="sum"
+                        class="form-control"
+                        type="text"
+                        pattern="-?[0-9]+(,[0-9]{1,2})?"
+                        autocomplete="off"
+                        required
+                />
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+    {% load static %}
+    <script src={% static "js/form.js" %}></script>
+{% endblock %}

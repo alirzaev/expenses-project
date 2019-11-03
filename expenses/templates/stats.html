@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+    <h3>Статистика</h3>
+    <form method="get" action="{% url 'expenses:stats' %}">
+        {% csrf_token %}
+        <label>Выберите диапазон дат</label>
+        <div class="form-group row">
+            <label
+                    for="begin"
+                    class="col-2 col-form-label"
+            >От: </label>
+            <input
+                    id="begin"
+                    name="begin"
+                    type="date"
+                    class="form-control col mr-3"
+                    required
+            />
+        </div>
+        <div class="form-group row">
+            <label
+                    for="end"
+                    class="col-2 col-form-label"
+            >До: </label>
+            <input
+                    id="end"
+                    name="end"
+                    type="date"
+                    class="form-control col mr-3"
+                    required
+            />
+        </div>
+        <button
+                type="submit"
+                class="btn btn-primary"
+        >Показать</button>
+    </form>
+
+    <div class="table-responsive mt-3">
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Описание</th>
+                    <th scope="col">Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        {% for col in record %}
+                            <td>{{col}}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td><b>Итого</b></td>
+                    <td>{{ total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

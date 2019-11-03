@@ -1,0 +1,6 @@
+django==2.1
+psycopg2==2.7.7
+gunicorn==19.9
+django_heroku==0.3
+django-admin-rangefilter==0.3.14
+django-import-export==1.2.0
