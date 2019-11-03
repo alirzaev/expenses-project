@@ -68,5 +68,9 @@ def stats(request):
 
     return render(request, 'stats.html', context={
         'records': records,
-        'total': total
+        'total': total,
+        'dates': {
+            'begin': data.get('begin', ''),
+            'end': data.get('end', '')
+        }
     })

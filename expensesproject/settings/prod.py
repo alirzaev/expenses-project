@@ -1,7 +1,15 @@
+import dj_database_url
+
 from .defaults import *
 
-import django_heroku
+_MAX_CONN_AGE = 600
 
 DEBUG = False
 
-django_heroku.settings(locals())
+ALLOWED_HOSTS = ['*']
+
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=_MAX_CONN_AGE)
+}
+
+SECRET_KEY = os.environ['SECRET_KEY']
