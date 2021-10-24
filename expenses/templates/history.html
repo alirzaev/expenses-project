@@ -1,25 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3>Последние записи</h3>
-    <div class="table-responsive">
-        <table class="table table-sm table-bordered">
-            <thead>
-                <tr>
-                    <th scope="col">Дата</th>
-                    <th scope="col">Описание</th>
-                    <th scope="col">Сумма</th>
-                    <th scope="col">Время</th>
+<h3>Последние записи</h3>
+<div class="d-inline-flex flex-row justify-content-start mt-2 mb-2">
+    <a class="pe-2" href="{% url 'expenses:history'%}?count=5">5 записей</a>
+    <a class="pe-2" href="{% url 'expenses:history'%}?count=10">10 записей</a>
+    <a class="pe-2" href="{% url 'expenses:history'%}?count=20">20 записей</a>
+</div>
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Дата</th>
+                <th scope="col">Описание</th>
+                <th scope="col">Сумма</th>
+                <th scope="col">Время</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in object_list %}
+                <tr data-record-url="{% url 'expenses:record' record.id %}">
+                    <td>{{ record.date|date:'d.m.Y' }}</td>
+                    <td>{{ record.category }}</td>
+                    <td>{{ record.sum }}</td>
+                    <td>{{ record.time|date:'d.m.Y' }} {{ record.time|time:'H:i:s' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                    <tr>
-                        {% for col in record %}
-                            <td>{{col}}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% load static %}
+<script src="{% static 'js/history.js' %}"></script>
 {% endblock %}

@@ -1,32 +1,61 @@
-import datetime
-
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.db.transaction import atomic
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.urls import reverse
+from django.views import generic
 
-from .models import Record, Category
-
-
-def index(request):
-    categories = [category.name for category in Category.objects.order_by('priority').all()]
-    return render(request, 'index.html', context={
-        'categories': categories
-    })
+from .forms import DateRangeForm
+from .models import Category, Record
 
 
-def submit(request):
-    data = request.POST
-    date = datetime.date.fromisoformat(data['date'])
-    category = data['category']
-    sum_ = data['sum'].replace(',', '.')
-    if 'otherCategory' in data:
-        category = data['otherCategory']
+class IndexView(generic.CreateView):
+    model = Record
 
-    record = Record(date=date, category=category, sum=sum_)
-    record.save()
+    template_name = 'index.html'
 
-    return redirect('expenses:submitted')
+    fields = ['date', 'category', 'sum']
+
+    def get_context_data(self, **kwargs):
+        kwargs['categories'] = list(
+            Category.objects.order_by('priority').values('name').all()
+        )
+
+        return super().get_context_data(**kwargs)
+
+    def get_success_url(self):
+        return reverse('expenses:submitted')
+
+
+class HistoryView(LoginRequiredMixin, generic.ListView):
+    model = Record
+
+    template_name = 'history.html'
+
+    ordering = ['-time']
+
+    DEFAULT_COUNT = 5
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        count = self.request.GET.get('count')
+
+        if count is None or not count.isdigit():
+            return queryset[:self.DEFAULT_COUNT]
+        else:
+            return queryset[:int(count)]
+
+
+class RecordDetailView(LoginRequiredMixin, generic.UpdateView):
+    model = Record
+
+    fields = ['date', 'category', 'sum']
+
+    template_name = 'record.html'
+
+    def get_success_url(self):
+        return reverse('expenses:record', args=[self.object.id])
 
 
 def submitted(request):
@@ -34,43 +63,31 @@ def submitted(request):
 
 
 @login_required
-def history(request):
-    records = [(item.date.strftime('%d.%m.%y'),
-                item.category,
-                item.sum,
-                item.time.strftime('%d.%m.%y %H:%M %z')) for item in
-               Record.objects.order_by('-time').all()[:5]]
-
-    return render(request, 'history.html', context={
-        'records': records
-    })
-
-
-@login_required
 @atomic
 def stats(request):
-    data = request.GET
-    if 'begin' in data and 'end' in data:
-        begin = datetime.date.fromisoformat(data['begin'])
-        end = datetime.date.fromisoformat(data['end'])
+    form = DateRangeForm(request.GET)
 
-        records = Record.objects\
-            .filter(date__lte=end, date__gte=begin)\
-            .values_list('category', named=True)\
-            .annotate(s=Sum('sum'))\
-            .order_by('s')
+    if form.is_valid():
+        begin = form.cleaned_data['begin_date']
+        end = form.cleaned_data['end_date']
 
-        total = Record.objects\
-            .filter(date__lte=end, date__gte=begin)\
+        records = Record.objects \
+            .filter(date__lte=end, date__gte=begin) \
+            .values('category') \
+            .annotate(total=Sum('sum')) \
+            .order_by('total') \
+            .values_list('category', 'total', named=True)
+    
+
+        total = Record.objects \
+            .filter(date__lte=end, date__gte=begin) \
             .aggregate(total=Sum('sum'))['total'] or 0
     else:
         records, total = (), 0
+        form = DateRangeForm()
 
     return render(request, 'stats.html', context={
         'records': records,
         'total': total,
-        'dates': {
-            'begin': data.get('begin', ''),
-            'end': data.get('end', '')
-        }
+        'form': form,
     })

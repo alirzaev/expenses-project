@@ -1,17 +1,26 @@
 (() => {
-    document.getElementById('category').onchange = event => {
-        const value = event.target.value;
+    const Form = {
+        data() {
+            const mixin = document.querySelector('#django-mixin');
+            const categories = JSON.parse(mixin.textContent) ?? [];
 
-        const other = document.getElementById('otherCategory');
-
-        if (value === '') {
-            other.setAttribute('required', '');
-            other.setAttribute('name', 'otherCategory');
-            other.hidden = false;
-        } else {
-            other.removeAttribute('required');
-            other.removeAttribute('name');
-            other.hidden = true;
+            return {
+                categories: categories,
+                selected: categories.length > 0 ? categories[0].name : ''
+            };
+        },
+        computed: {
+            noCategories() {
+                return this.categories.length === 0;
+            },
+            customSelected() {
+                return this.selected === '';
+            }
         }
     };
+
+    const app = Vue.createApp(Form);
+    app.config.compilerOptions.delimiters = ['${', '}$'];
+
+    app.mount('#vue-form');
 })();

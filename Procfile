@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn -b 0.0.0.0:$PORT expensesproject.wsgi:application
+web: gunicorn -b 0.0.0.0:$PORT config.wsgi:application

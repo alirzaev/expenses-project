@@ -7,7 +7,6 @@ from .models import Record, Category
 
 
 class RecordResource(ModelResource):
-
     class Meta:
         model = Record
 
@@ -19,22 +18,18 @@ class RecordResource(ModelResource):
             }
         }
 
-    @staticmethod
-    def dehydrate_sum(record):
-        return str(record.sum).replace('.', ',')
-
 
 class RecordAdmin(ExportActionMixin, admin.ModelAdmin):
-
     resource_class = RecordResource
 
     list_filter = (('date', DateRangeFilter),)
 
     ordering = ('-date', '-time')
 
+    readonly_fields = ('time',)
+
 
 class CategoryResource(ModelResource):
-
     class Meta:
         model = Category
 
@@ -42,7 +37,6 @@ class CategoryResource(ModelResource):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-
     resource_class = CategoryResource
 
     ordering = ('priority', 'name')
