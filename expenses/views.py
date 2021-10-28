@@ -58,8 +58,8 @@ class RecordDetailView(LoginRequiredMixin, generic.UpdateView):
         return reverse('expenses:record', args=[self.object.id])
 
 
-def submitted(request):
-    return render(request, 'submitted.html')
+class SubmittedView(generic.TemplateView):
+    template_name = 'submitted.html'
 
 
 @login_required
