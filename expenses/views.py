@@ -10,7 +10,7 @@ from .forms import DateRangeForm
 from .models import Category, Record
 
 
-class IndexView(generic.CreateView):
+class IndexView(LoginRequiredMixin, generic.CreateView):
     model = Record
 
     template_name = 'index.html'
