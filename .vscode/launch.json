@@ -8,6 +8,16 @@
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "runserver"
+            ],
+            "django": true
+        },
+        {
+            "name": "Python: Django (Windows)",
+            "type": "python",
+            "request": "launch",
             "program": "${workspaceFolder}\\manage.py",
             "args": [
                 "runserver"
