@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Sum
 from django.db.transaction import atomic
 from django.shortcuts import render
@@ -10,12 +11,14 @@ from .forms import DateRangeForm
 from .models import Category, Record
 
 
-class IndexView(LoginRequiredMixin, generic.CreateView):
+class IndexView(LoginRequiredMixin, SuccessMessageMixin, generic.CreateView):
     model = Record
 
     template_name = 'index.html'
 
     fields = ['date', 'category', 'sum']
+
+    success_message = 'Ответ записан'
 
     def get_context_data(self, **kwargs):
         kwargs['categories'] = list(
@@ -25,7 +28,7 @@ class IndexView(LoginRequiredMixin, generic.CreateView):
         return super().get_context_data(**kwargs)
 
     def get_success_url(self):
-        return reverse('expenses:submitted')
+        return reverse('expenses:index')
 
 
 class HistoryView(LoginRequiredMixin, generic.ListView):
@@ -47,19 +50,17 @@ class HistoryView(LoginRequiredMixin, generic.ListView):
             return queryset[:int(count)]
 
 
-class RecordDetailView(LoginRequiredMixin, generic.UpdateView):
+class RecordDetailView(LoginRequiredMixin, SuccessMessageMixin, generic.UpdateView):
     model = Record
 
     fields = ['date', 'category', 'sum']
 
     template_name = 'record.html'
 
+    success_message = 'Данные обновлены'
+
     def get_success_url(self):
         return reverse('expenses:record', args=[self.object.id])
-
-
-class SubmittedView(generic.TemplateView):
-    template_name = 'submitted.html'
 
 
 @login_required
